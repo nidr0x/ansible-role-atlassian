@@ -1,0 +1,79 @@
+---
+
+- name: JIRA | Creating group
+  group:
+    name: "{{ jira_user }}"
+    gid: "{{ jira_gid | default(None) or omit }}"
+
+- name: JIRA | Creating JIRA user
+  user:
+    name: "{{ jira_user }}"
+    home: "{{ jira_home }}"
+    group: "{{ jira_user }}"
+    uid: "{{ jira_uid | default(None) or omit }}"
+    shell: "/bin/bash"
+
+- name: JIRA | Preparing files
+  file:
+    dest: "{{ item.dest }}"
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+    mode: "{{ item.mode }}"
+    state: "{{ item.state }}"
+  with_items:
+    - { dest: "{{ jira_home }}", owner: "{{ jira_user }}", group: "{{ jira_user }}", mode: "0755", state: "directory" }
+    - { dest: "{{ jira_installation_dir }}", owner: "{{ jira_user }}", group: "{{ jira_user }}", mode: "0755", state: "directory" }
+
+- name: JIRA | Downloading package
+  get_url:
+    url: "{{ jira_url }}"
+    dest: "/tmp/{{ jira_filename }}"
+    checksum: "{{ jira_checksum }}"
+  register: jira_downloaded
+
+- name: JIRA | Unarchive package
+  unarchive:
+      src: "/tmp/{{ jira_filename }}"
+      dest: "{{ jira_installation_dir }}"
+      extra_opts: "--strip-components=1"
+      remote_src: yes
+      owner: "{{ jira_user }}"
+      mode: 0755
+  when: jira_downloaded.changed
+
+- name: JIRA | Chown package
+  file:
+      path: "{{ item }}"
+      owner: "{{ jira_user }}"
+      group: "{{ jira_user }}"
+      recurse: yes
+  with_items:
+      - "{{ jira_home }}"
+      - "{{ jira_installation_dir }}"
+
+- name: JIRA | Copying templates
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+    mode: "{{ item.mode }}"
+  with_items:
+    - { src: "var/lib/jira/bin/setenv.sh.j2", dest: "{{ jira_installation_dir }}/bin/setenv.sh", owner: "{{ jira_user }}", group: "{{ jira_user }}", mode: "0755" }
+    - { src: "var/lib/jira/conf/dbconfig.xml.j2", dest: "{{ jira_home }}/dbconfig.xml", owner: "{{ jira_user }}", group: "{{ jira_user }}", mode: "0644" } 
+
+- name: JIRA | Copying startup script
+  template: 
+      src: etc/init.d/jira.service.j2 
+      dest: /etc/systemd/system/jira.service
+      mode: 0644
+      owner: "{{ jira_user }}"
+      group: "{{ jira_user }}"
+  notify: restart jira
+
+- name: JIRA | Enabling JIRA service...
+  systemd:
+    name: jira
+    enabled: yes
+    masked: no
+    state: restarted

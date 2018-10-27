@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<confluence-configuration>
+  <setupStep>complete</setupStep>
+  <setupType>custom</setupType>
+  <buildNumber>7901</buildNumber>
+  <properties>
+    <property name="access.mode">READ_WRITE</property>
+    <property name="admin.ui.allow.daily.backup.custom.location">false</property>
+    <property name="admin.ui.allow.manual.backup.download">false</property>
+    <property name="admin.ui.allow.site.support.email">false</property>
+    <property name="atlassian.license.message">{{ confluence_config_license_number }}</property>
+    <property name="attachments.dir">${confluenceHome}/{{confluence_config_attachments_dir}}</property>
+    <property name="confluence.setup.server.id">{{confluence_config_server_id}}</property>
+    <property name="confluence.webapp.context.path"></property>
+    <property name="hibernate.c3p0.acquire_increment">1</property>
+    <property name="hibernate.c3p0.idle_test_period">100</property>
+    <property name="hibernate.c3p0.max_size">60</property>
+    <property name="hibernate.c3p0.max_statements">0</property>
+    <property name="hibernate.c3p0.min_size">20</property>
+    <property name="hibernate.c3p0.preferredTestQuery">select 1</property>
+    <property name="hibernate.c3p0.timeout">30</property>
+    <property name="hibernate.connection.driver_class">org.postgresql.Driver</property>
+    <property name="hibernate.connection.isolation">2</property>
+    <property name="hibernate.connection.password">Rk2nqu3EW4TE3</property>
+    <property name="hibernate.connection.url">jdbc:{{confluence_config_db_params[confluence_config_db_type].url}}://{{confluence_config_db_host}}:{{confluence_config_db_port}}/{{confluence_config_db_name}}</property>
+    <property name="hibernate.connection.username">{{confluence_config_db_user}}</property>
+    <property name="hibernate.database.lower_non_ascii_supported">true</property>
+    <property name="hibernate.dialect">com.atlassian.confluence.impl.hibernate.dialect.PostgreSQLDialect</property>
+    <property name="hibernate.setup">true</property>
+    <property name="jwt.private.key">{{ confluence_config_private_key }}</property>
+    <property name="jwt.public.key">{{ confluence_config_public_key }}</property>
+    <property name="lucene.index.dir">${localHome}/index</property>
+    <property name="synchrony.encryption.disabled">true</property>
+    <property name="synchrony.proxy.enabled">true</property>
+    <property name="webwork.multipart.saveDir">${localHome}/temp</property>
+  </properties>
+</confluence-configuration>

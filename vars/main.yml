@@ -1,0 +1,5 @@
+---
+
+jira_url: "http://www.atlassian.com/software/jira/downloads/binary/atlassian-jira-software-{{ jira_version_download }}.tar.gz"
+
+confluence_url: "https://downloads.atlassian.com/software/confluence/downloads/atlassian-confluence-{{ confluence_version_download }}.tar.gz"

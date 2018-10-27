@@ -1,0 +1,16 @@
+---
+
+galaxy_info:
+  author: Carlos R.
+  description: An Ansible role to install JIRA and Confluence (without JVM)
+  license: "license (BSD, MIT)"
+  min_ansible_version: 2.4
+  platforms:
+    - name: Debian
+      versions:
+      - all
+    - name: Ubuntu
+      versions:
+      - all
+  galaxy_tags:
+    - jira 

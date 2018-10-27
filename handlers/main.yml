@@ -1,0 +1,11 @@
+---
+
+- name: restart jira
+  service:
+    name: "jira"
+    state: "restarted"
+
+- name: restart confluence
+  service:
+    name: "confluence"
+    state: "restarted"

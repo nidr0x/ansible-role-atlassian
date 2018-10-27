@@ -1,0 +1,12 @@
+- name: JIRA | Checking if meet requeriments
+  package:
+      name: nfs-common
+      state: present
+
+- name: JIRA | Mount NFS (or EFS) for attachments
+  mount:
+      fstype: "{{ attachments_mount_filesystem }}"
+      opts: "{{ attachments_mount_options }}" 
+      src: "{{ attachments_mount_src }}" 
+      path: "{{ attachments_mount_path }}" 
+      state: present

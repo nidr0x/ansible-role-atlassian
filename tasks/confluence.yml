@@ -1,0 +1,80 @@
+---
+
+- name: Confluence | Creating group
+  group:
+    name: "{{ confluence_user }}"
+    gid: "{{ confluence_gid | default(None) or omit }}"
+
+- name: Confluence | Creating Confluence user
+  user:
+    name: "{{ confluence_user }}"
+    home: "{{ confluence_home }}"
+    group: "{{ confluence_user }}"
+    uid: "{{ confluence_uid | default(None) or omit }}"
+    shell: "/bin/bash"
+
+- name: Confluence | Preparing files
+  file:
+    dest: "{{ item.dest }}"
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+    mode: "{{ item.mode }}"
+    state: "{{ item.state }}"
+  with_items:
+    - { dest: "{{ confluence_home }}", owner: "{{ confluence_user }}", group: "{{ confluence_user }}", mode: "0755", state: "directory" }
+    - { dest: "{{ confluence_installation_dir }}", owner: "{{ confluence_user }}", group: "{{ confluence_user }}", mode: "0755", state: "directory" }
+
+- name: Confluence | Downloading package
+  get_url:
+    url: "{{ confluence_url }}"
+    dest: "/tmp/{{ confluence_filename }}"
+    checksum: "{{ confluence_checksum }}"
+  register: confluence_downloaded
+
+- name: Confluence | Unarchive package
+  unarchive:
+      src: "/tmp/{{ confluence_filename }}"
+      dest: "{{ confluence_installation_dir }}"
+      extra_opts: "--strip-components=1"
+      remote_src: yes
+      owner: "{{ confluence_user }}"
+      mode: 0755
+  when: confluence_downloaded.changed
+
+- name: Confluence | Chown package
+  file:
+      path: "{{ item }}"
+      owner: "{{ confluence_user }}"
+      group: "{{ confluence_user }}"
+      recurse: yes
+  with_items:
+      - "{{ confluence_home }}"
+      - "{{ confluence_installation_dir }}"
+
+- name: Confluence | Copying templates
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+    mode: "{{ item.mode }}"
+  with_items:
+    - { src: "var/lib/confluence/bin/setenv.sh.j2", dest: "{{ confluence_installation_dir }}/bin/setenv.sh", owner: "{{ confluence_user }}", group: "{{ confluence_user }}", mode: "0755" }
+    - { src: "var/lib/confluence/conf/confluence.cfg.xml.j2", dest: "{{ confluence_home }}/confluence.cfg.xml", owner: "{{ confluence_user }}", group: "{{ confluence_user }}", mode: "0644" } 
+    - { src: "var/lib/confluence/conf/server.xml.j2", dest: "{{ confluence_home }}/server.xml", owner: "{{ confluence_user }}", group: "{{ confluence_user }}", mode: "0644" } 
+
+- name: Confluence | Copying startup script
+  template: 
+      src: etc/init.d/confluence.service.j2 
+      dest: /etc/systemd/system/confluence.service
+      mode: 0644
+      owner: "{{ confluence_user }}"
+      group: "{{ confluence_user }}"
+  notify: restart confluence 
+
+- name: Confluence | Enabling Confluence service
+  systemd:
+    name: confluence
+    enabled: yes
+    masked: no
+    state: restarted

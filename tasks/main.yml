@@ -1,0 +1,12 @@
+---
+- include: nfs.yml
+  when: nfs_is_enabled is defined and nfs_is_enabled == true 
+  tags: nfs
+
+- include: jira.yml
+  when: jira_is_enabled is defined and jira_is_enabled == true
+  tags: jira
+
+- include: confluence.yml
+  when: confluence_is_enabled is defined and confluence_is_enabled == true 
+  tags: confluence
